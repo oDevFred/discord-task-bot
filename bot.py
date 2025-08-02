@@ -1,10 +1,22 @@
 import os
 import discord
+import logging
 
 from discord.ext import commands
 from dotenv import load_dotenv
 from cogs.tasks import TaskCog
 from cogs.pomodoro import PomodoroCog
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('bot.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # Carrega as variáveis de ambiente
 load_dotenv()
@@ -27,6 +39,7 @@ async def on_ready():
 # Comando: !ping
 @bot.command()
 async def ping(ctx):
+    logger.info(f'Comando !ping executado por {ctx.author}')
     await ctx.send('Pong!')
 
 # Iniciar bot

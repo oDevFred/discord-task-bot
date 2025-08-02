@@ -1,23 +1,29 @@
 import discord
 import asyncio
+import logging
+
 from discord.ext import commands, tasks
 from database import Database
 from datetime import datetime, date
+
+logger = logging.getLogger(__name__)
 
 class TaskCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.db = Database()
         self.check_reminders.start()
+        logger.info("TasksCog inicializado")
 
     def cog_unload(self):
         self.check_reminders.cancel()
 
     @tasks.loop(minutes=60) # Verifica a cada hora
     async def check_reminders(self):
+        logger.info("Verificando lembretes")
+        today = datetime.now().strftime('%Y-%m-%d')
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
-            today = datetime.now().strftime('%Y-%m-%d')
             cursor.execute('SELECT id, user_id, description FROM tasks WHERE due_date = ?', (today,))
             tasks = cursor.fetchall()
 
@@ -27,8 +33,9 @@ class TaskCog(commands.Cog):
             if user:
                 try:
                     await user.send(f"Lembrete: A tarefa '{description}' (ID: {task_id}) vence hoje!")
+                    logger.info(f"Lembrete enviado para {user_id}: Tarefa {task_id}")
                 except discord.errors.Forbidden:
-                    print(f"Não foi possível enviar DM para o usuário {user_id}")
+                    logger.error(f"Não foi possível enviar DM para o usuário {user_id}")
 
     @check_reminders.before_loop
     async def before_check_reminders(self):
@@ -38,6 +45,7 @@ class TaskCog(commands.Cog):
     async def add_task(self, ctx, *, description_and_date=None):
         if not description_and_date:
             await ctx.send('Porfavor, forneça uma descrição para a tarefa.')
+            logger.warning(f"Comando !add_task sem descrição por {ctx.author}")
             return
 
         # Separar descrição e data
@@ -50,6 +58,7 @@ class TaskCog(commands.Cog):
                 datetime.fromisoformat(due_date)
             except ValueError:
                 await ctx.send('Formato de data inválido. Use AAAA-MM-DD (e.g., 2025-08-10)')
+                logger.error(f"Formato de data inválido em !add_task por {ctx.author}: {due_date}")
                 return
 
         with self.db.get_connection() as conn:
@@ -60,6 +69,7 @@ class TaskCog(commands.Cog):
             )
             conn.commit()
             await ctx.send(f'Tarefa adicionada: {description}')
+            logger.info(f"Tarefa adicionada por {ctx.author}: {description}")
 
     @commands.command()
     async def list_tasks(self, ctx):
@@ -70,6 +80,7 @@ class TaskCog(commands.Cog):
 
         if not tasks:
             await ctx.send("Você não tem tarefas.")
+            logger.info(f"Sem tarefas para {ctx.author}")
             return
 
         response = "Suas tarefas:\n"
@@ -78,6 +89,7 @@ class TaskCog(commands.Cog):
             due_date_str = f" (Vence: {due_date})" if due_date else ""
             response += f"ID: {task_id} - {description}{due_date_str}\n"
         await ctx.send(response)
+        logger.info(f"Tarefas listadas para {ctx.author}")
 
     @commands.command()
     async def remove_task(self, ctx, task_id: int):
@@ -86,6 +98,8 @@ class TaskCog(commands.Cog):
             cursor.execute('DELETE FROM tasks WHERE id = ? AND user_id = ?', (task_id, ctx.author.id))
             if cursor.rowcount == 0:
                 await ctx.send("Tarefa não encontrada ou não pertence a você.")
+                logger.warning(f"Tentativa de remover tarefa inexistente {task_id} por {ctx.author}")
                 return
             conn.commit()
             await ctx.send(f"Tarefa ID {task_id} removida.")
+            logger.info(f"Tarefa {task_id} removida por {ctx.author}")
