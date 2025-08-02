@@ -20,7 +20,9 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     print(f'Bot conectado com {bot.user.name}')
+    print('Carregando TaskCog...')
     await bot.add_cog(TaskCog(bot))
+    print('TaskCog carregado!')
 
 # Comando: !ping
 @bot.command()

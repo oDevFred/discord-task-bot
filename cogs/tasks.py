@@ -1,12 +1,38 @@
 import discord
-from discord.ext import commands
+import asyncio
+from discord.ext import commands, tasks
 from database import Database
-from datetime import datetime
+from datetime import datetime, date
 
 class TaskCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.db = Database()
+        self.check_reminders.start()
+
+    def cog_unload(self):
+        self.check_reminders.cancel()
+
+    @tasks.loop(minutes=60) # Verifica a cada hora
+    async def check_reminders(self):
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            today = datetime.now().strftime('%Y-%m-%d')
+            cursor.execute('SELECT id, user_id, description FROM tasks WHERE due_date = ?', (today,))
+            tasks = cursor.fetchall()
+
+        for task in tasks:
+            task_id, user_id, description = task
+            user = self.bot.get_user(user_id)
+            if user:
+                try:
+                    await user.send(f"Lembrete: A tarefa '{description}' (ID: {task_id}) vence hoje!")
+                except discord.errors.Forbidden:
+                    print(f"Não foi possível enviar DM para o usuário {user_id}")
+
+    @check_reminders.before_loop
+    async def before_check_reminders(self):
+        await self.bot.wait_until_ready()
 
     @commands.command()
     async def add_task(self, ctx, *, description_and_date=None):
