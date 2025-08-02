@@ -241,5 +241,7 @@ Este projeto está licenciado sob a [Licença MIT](LICENSE). Veja o arquivo `LIC
 ---
 
 **Desenvolvido por**: [oDevFred](https://odevfred.github.io/portifolio/)
+
 **Contato**: [Email](mailto:caio.frederico2001@outlook.com) 
+
 **Última Atualização**: Agosto de 2025
