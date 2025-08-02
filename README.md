@@ -21,7 +21,7 @@ Um bot do Discord desenvolvido em Python com `discord.py` para gerenciamento de 
 
 ## Pré-requisitos
 
-- **Python 3.8+**: Certifique-se de ter o Python instalado. Verifique com `python --version`.
+- **Python 3.8+**: Certifique-se de ter o Python instalado. Verifique com `python3 --version`.
 - **Conta no Discord**: Crie um bot no [Discord Developer Portal](https://discord.com/developers/applications).
 - **Git**: Para clonar o repositório (`git --version` para verificar).
 - **Permissões do Bot**:
@@ -39,7 +39,7 @@ Um bot do Discord desenvolvido em Python com `discord.py` para gerenciamento de 
     ```
 2. **Crie e ative um ambiente virtual**:
     ```bash
-    python -m venv venv
+    python3 -m venv venv
     source venv/bin/activate  # Linux/Mac
     venv\Scripts\activate     # Windows
     ```
