@@ -10,5 +10,5 @@ Um bot do Discord para gerenciamento de tarefas e estudos, com funcionalidades d
 ## Instalação
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu_usuario/discord-task-bot.git
+   git clone https://github.com/oDevFred/discord-task-bot.git
    cd discord-task-bot
