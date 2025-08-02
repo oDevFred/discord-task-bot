@@ -3,6 +3,7 @@ import discord
 
 from discord.ext import commands
 from dotenv import load_dotenv
+from cogs.tasks import TaskCog
 
 # Carrega as variáveis de ambiente
 load_dotenv()
@@ -19,6 +20,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     print(f'Bot conectado com {bot.user.name}')
+    await bot.add_cog(TaskCog(bot))
 
 # Comando: !ping
 @bot.command()
