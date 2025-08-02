@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from cogs.tasks import TaskCog
+from cogs.pomodoro import PomodoroCog
 
 # Carrega as variáveis de ambiente
 load_dotenv()
@@ -20,9 +21,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     print(f'Bot conectado com {bot.user.name}')
-    print('Carregando TaskCog...')
     await bot.add_cog(TaskCog(bot))
-    print('TaskCog carregado!')
+    await bot.add_cog(PomodoroCog(bot))
 
 # Comando: !ping
 @bot.command()
